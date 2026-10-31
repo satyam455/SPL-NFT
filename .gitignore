@@ -1,0 +1,5 @@
+node_modules/
+wallet.json
+recipient.json
+*-keypair.json
+.env
