@@ -1,16 +1,16 @@
 # SPL Token and MPL Core NFT
 
-Simple TypeScript scripts for Solana **devnet**:
+This project uses Solana devnet to:
 
-1. Create an SPL token, mint 100 tokens, and transfer 10 to another wallet.
-2. Mint an MPL Core NFT.
-3. Update its name and metadata URI using the update authority.
-4. Optionally transfer the NFT to another wallet.
-5. Optionally burn it and reclaim recoverable rent.
+1. Create an SPL token, mint 100 tokens, and send 10 tokens to another wallet.
+2. Mint an NFT with MPL Core.
+3. Update the NFT name and metadata.
+4. Transfer the NFT to another wallet (optional).
+5. Burn the NFT and recover the available rent (optional).
 
 ## Setup
 
-Install Node.js 22+ and the Solana CLI. Run commands from this folder.
+Install Node.js 22+ and the Solana CLI. Then run:
 
 ```sh
 npm install
@@ -22,93 +22,75 @@ solana airdrop 1 --keypair recipient.json
 solana-keygen pubkey recipient.json
 ```
 
-Save the recipient public address printed by the last command. If the airdrop is rate limited, use [Solana Faucet](https://faucet.solana.com/). Keep both keypair files private; never commit them or share their contents.
+Copy the recipient address printed by the last command. If the airdrop does not work, use the [Solana Faucet](https://faucet.solana.com/).
 
-## 1. Mint and transfer an SPL token
+Do not commit or share the wallet JSON files.
 
-Replace `RECIPIENT_ADDRESS` with that public address:
+## Create and transfer an SPL token
+
+Replace `RECIPIENT_ADDRESS` with the recipient wallet address:
 
 ```sh
 npm run token -- RECIPIENT_ADDRESS
 ```
 
-The token has six decimal places. The script prints its mint address and transaction signatures. Your wallet keeps 90 tokens and the recipient gets 10. Running this command again creates a new mint.
+This creates a token with 6 decimals, mints 100 tokens, and sends 10 to the recipient. The main wallet keeps the other 90 tokens.
 
-## 2. Mint a Core NFT
+## Mint an NFT
 
-Your supplied image is included as `assets/nft.jpg` (the original JFIF/JPEG bytes are preserved). The two metadata files are included in `assets/` too.
+The NFT image and metadata files are in the `assets` folder. Upload this project to a public GitHub repository so the image and metadata URLs can be accessed.
 
-In both JSON files, replace `YOUR_USERNAME` and `YOUR_REPOSITORY` with your GitHub username and public repository name. The example URLs assume the `main` branch. Push the image and JSON files to that repository so their raw URLs are publicly accessible.
+Check that the URLs in these files point to your repository:
 
-Initial `metadata.json`:
+- `assets/metadata.json`
+- `assets/metadata-updated.json`
 
-```json
-{
-  "name": "turbin3",
-  "symbol": "T3",
-  "description": "My first MPL Core NFT on Solana devnet.",
-  "image": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPOSITORY/main/assets/nft.jpg"
-}
-```
-
-Updated `metadata-updated.json`:
-
-```json
-{
-  "name": "turbin3",
-  "symbol": "T3",
-  "description": "Metadata updated by the update authority.",
-  "image": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPOSITORY/main/assets/nft.jpg"
-}
-```
-
-Replace `INITIAL_METADATA_URL` with the actual public URL of the initial JSON:
+Use the public raw URL of `metadata.json` to mint the NFT:
 
 ```sh
 npm run nft -- mint INITIAL_METADATA_URL
 ```
 
-Save the printed asset address as `ASSET_ADDRESS`. Your wallet is both owner and update authority. The script stores the metadata URL on chain; it does not upload files.
+The command prints the NFT asset address. Save it for the next steps. The main wallet is both the owner and update authority.
 
-## 3. Update the NFT
+## Update the NFT
 
-Use the public URL of the updated JSON:
+Use the asset address and the public raw URL of `metadata-updated.json`:
 
 ```sh
 npm run nft -- update ASSET_ADDRESS UPDATED_METADATA_URL
 ```
 
-This sets the on-chain name to `turbin3` and replaces the metadata URI. `wallet.json` signs as update authority. The symbol `T3` is stored in the JSON metadata.
+This updates the NFT name and metadata URI. The main wallet signs the transaction as the update authority.
 
-## 4. Transfer ownership (optional)
+## Transfer the NFT (optional)
 
 ```sh
 npm run nft -- transfer ASSET_ADDRESS RECIPIENT_ADDRESS
 ```
 
-The recipient becomes the owner. The original wallet remains the update authority.
+The recipient wallet becomes the new owner. The main wallet stays as the update authority.
 
-## 5. Burn and reclaim rent (optional)
+## Burn the NFT (optional)
 
-After transferring, sign with the recipient wallet:
+If the NFT was transferred, burn it with the recipient wallet:
 
 ```sh
 npm run nft -- burn ASSET_ADDRESS recipient.json
 ```
 
-If you skipped the transfer, use `wallet.json` instead. Burning permanently destroys the NFT. Core returns recoverable asset rent to its owner; transaction fees are still charged and a small account record remains. Hosted metadata and images are not deleted.
+If the NFT was not transferred, use the main wallet:
 
-## Check and submission
+```sh
+npm run nft -- burn ASSET_ADDRESS wallet.json
+```
+
+Burning permanently destroys the NFT and returns the recoverable rent to its owner.
+
+## Check the code
 
 ```sh
 npm run check
 ```
 
-View the printed addresses and signatures in [Solana Explorer](https://explorer.solana.com/?cluster=devnet), with the cluster set to devnet. Record the mint, asset address, and transaction links before burning.
-
-Push this folder to your repository and submit its URL. Publish a thread, article, or tutorial on X, LinkedIn, or YouTube and submit that public link too. Explain what you ran, what you learned about token accounts and NFT ownership/update authority, and how tokens or editable NFTs could support rewards, memberships, or game items. Include your actual devnet transaction links.
-
-## References
-
-- [Solana SPL token basics](https://solana.com/docs/tokens/basics)
-- [Metaplex Core JavaScript SDK](https://www.metaplex.com/docs/smart-contracts/core/sdk/javascript)
+You can view the addresses and transaction signatures on [Solana Explorer](https://explorer.solana.com/?cluster=devnet). Make sure the selected network is devnet.
